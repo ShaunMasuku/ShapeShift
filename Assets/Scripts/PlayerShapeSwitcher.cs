@@ -21,6 +21,11 @@ public class PlayerShapeSwitcher : MonoBehaviour
     [Tooltip("The current shape of the player.")]
     public PlayerShapeType currentShape = PlayerShapeType.Cube;
 
+    /// <summary>
+    /// Gets the player's current active shape.
+    /// </summary>
+    public PlayerShapeType CurrentShape => currentShape;
+
     [Header("Visual Child References")]
     public GameObject visualCube;
     public GameObject visualSphere;

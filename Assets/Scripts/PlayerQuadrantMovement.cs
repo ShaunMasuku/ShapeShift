@@ -11,11 +11,36 @@ public class PlayerQuadrantMovement : MonoBehaviour
     [Tooltip("The spacing between the left/right columns and top/bottom rows.")]
     public float spacing = 3.0f;
 
+    [Header("Debug Settings")]
+    [Tooltip("If true, the debug quadrant visuals are displayed. If false, they are hidden.")]
+    public bool showDebugQuadrants = false;
+
+    [Tooltip("Reference to the GameObject containing debug quadrant visuals (like frames and panels).")]
+    public GameObject debugQuadrantVisuals;
+
     // Logical position indicators
     // Column (X): 0 is Left, 1 is Right
     // Row (Y):    0 is Bottom, 1 is Top
     private int currentColumn = 0; // Starts at Left (0)
     private int currentRow = 0;    // Starts at Bottom (0)
+
+    /// <summary>
+    /// Gets the player's current quadrant based on the column and row.
+    /// </summary>
+    public PlayerQuadrant CurrentQuadrant
+    {
+        get
+        {
+            if (currentColumn == 0)
+            {
+                return (currentRow == 1) ? PlayerQuadrant.TopLeft : PlayerQuadrant.BottomLeft;
+            }
+            else
+            {
+                return (currentRow == 1) ? PlayerQuadrant.TopRight : PlayerQuadrant.BottomRight;
+            }
+        }
+    }
 
     // Reference to the Input System's "Move" action
     private InputAction moveAction;
@@ -26,6 +51,22 @@ public class PlayerQuadrantMovement : MonoBehaviour
 
     private void Start()
     {
+        // Automatically try to find DebugQuadrantVisuals under Environment if not assigned
+        if (debugQuadrantVisuals == null)
+        {
+            GameObject env = GameObject.Find("GameplayRig/Environment") ?? GameObject.Find("Environment");
+            if (env != null)
+            {
+                Transform visuals = env.transform.Find("DebugQuadrantVisuals");
+                if (visuals != null)
+                {
+                    debugQuadrantVisuals = visuals.gameObject;
+                }
+            }
+        }
+
+        ApplyDebugVisualsState();
+
         // Bind to the project-wide "Move" action (default WASD/Arrows)
         if (InputSystem.actions != null)
         {
@@ -115,5 +156,21 @@ public class PlayerQuadrantMovement : MonoBehaviour
 
         // We snap immediately on X and Y, and keep the current Z completely constant.
         transform.position = new Vector3(targetX, targetY, transform.position.z);
+    }
+
+    /// <summary>
+    /// Updates the active state of the debug quadrant visuals based on showDebugQuadrants.
+    /// </summary>
+    public void ApplyDebugVisualsState()
+    {
+        if (debugQuadrantVisuals != null)
+        {
+            debugQuadrantVisuals.SetActive(showDebugQuadrants);
+        }
+    }
+
+    private void OnValidate()
+    {
+        ApplyDebugVisualsState();
     }
 }
